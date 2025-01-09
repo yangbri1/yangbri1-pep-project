@@ -1,5 +1,16 @@
 package Controller;
 
+/*
+ * SocialMediaController.java class contains endpoints & handlers setup
+ */
+
+import Model.Account;
+import Model.Message;
+// import Service.AuthorService;
+// import Service.BookService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
@@ -15,9 +26,13 @@ public class SocialMediaController {
      * @return a Javalin app object which defines the behavior of the Javalin controller.
      */
     public Javalin startAPI() {
+        // always start w/ .create() method to configure Javalin
         Javalin app = Javalin.create();
-        app.get("example-endpoint", this::exampleHandler);
+        // endpoint GET handler at /register endpoint 
+        app.get("/register", this::exampleHandler); 
 
+        // start server at PORT 8080
+        app.start(8080);
         return app;
     }
 

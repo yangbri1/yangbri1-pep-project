@@ -1,9 +1,9 @@
 drop table if exists message;
 drop table if exists account;
 create table account (
-    account_id int primary key auto_increment,
-    username varchar(255) unique,
-    password varchar(255)
+    account_id int primary key auto_increment,  -- program provides an unique constraint
+    username varchar(255) unique,               -- 'UNIQUE' constraint -- 'username' field can NOT be duplicates
+    password varchar(255)                        
 );
 create table message (
     message_id int primary key auto_increment,
