@@ -123,11 +123,36 @@ public class MessageDAO {
         return null;
     }
     // ## 6: Our API should be able to delete a message identified by a message ID.
+    // similar to UPDATE functionality below but parameter only require msgId
+    public void deleteMessagebyId(int msgId){
+        // establish a connection to database
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            // Write SQL logic here
+            // SQL String query to DELETE record from 'message' table
+            String sql = "DELETE FROM message WHERE message_id = ?";
+            // best practice to use 'PreparedStatement' interface as lower chances of SQL Injection from client-side affecting backend database
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
+            // write PreparedStatement setString and setInt methods here.
+            // preparedStatement.setInt(1, msg.getPosted_by());
+            // preparedStatement.setString(2, msg.getMessage_text());
+            // preparedStatement.setLong(3, msg.getTime_posted_epoch());
+        
+            // preparedStatement.setInt(4, msgId);
+
+            // preparedStatement.setString(1, msg.getMessage_text());
+            preparedStatement.setInt(1, msgId);
+
+            preparedStatement.executeUpdate();
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
     // ## 7: Our API should be able to update a message text identified by a message ID.
     /*
      * @param msgId a message ID.
-     * @param flight a message object. the flight object does not contain a flight ID.
+     * @param msg is a message object & the message object does not contain a message ID.
      */
     public void updateMessageById(int msgId, Message msg){
         Connection connection = ConnectionUtil.getConnection();
@@ -154,6 +179,40 @@ public class MessageDAO {
         }
     }
     // ## 8: Our API should be able to retrieve all messages written by a particular user.
- 
-
+    /* Note: This method should probably be of List type as will be returning a list of all messages by an User */
+    public List<Message> getAllMessagesByUserId(int userId){    // 'userId' is just a placeholder (for some 'account_id')
+        // connect to 'Message' table in database
+        Connection connection = ConnectionUtil.getConnection();
+        // declare an empty List obj of Message obj type
+        List<Message> messagesByUser = new ArrayList<>();
+        // try-catch block for error-handling
+        try {
+            // write/create SQL query String --- "posted_by" field is a FOREIGN KEY REFERENCES to "account_id" in 'account' table
+            String sql = "SELECT * FROM message WHERE posted_by = ?";
+            // create 'PreparedStatement' obj to send above parameterized SQL statement to DB
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            // PreparedStatement.setInt() method to set above (?) placeholder w/ to input arg's 'userId' value
+            preparedStatement.setInt(1, userId);    
+            // execute/send SQL queries to DB
+            ResultSet rs = preparedStatement.executeQuery();
+            // while ResultSet is not empty (records available, move cursor to next)
+            while(rs.next()){
+                // create an instance of Message obj -- retrieve from Message obj
+                Message msg = new Message(
+                    rs.getInt("message_id"), 
+                    rs.getInt("posted_by"),
+                    rs.getString("message_text"),
+                    rs.getLong("time_posted_epoch"));
+                // invoke .add() method to append current 'msg' into earlier declared List collection
+                messagesByUser.add(msg);
+            }
+        // if any Exceptions are caught
+        }catch(SQLException e){
+            // console log out to terminal
+            System.out.println(e.getMessage());
+        }
+        // return whole collection of messages labeled under this userId
+        return messagesByUser;
+    }
+    
 }
