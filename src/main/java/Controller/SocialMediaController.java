@@ -5,7 +5,7 @@ package Controller;
  */
 
 import Model.Account;
-import Model.Message;
+// import Model.Message;
 import Service.AccountService;
 // import Service.BookService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -36,12 +36,13 @@ public class SocialMediaController {
      */
     public Javalin startAPI() {
         // always start w/ .create() method to configure Javalin
-        Javalin app = Javalin.create();
+        // .start() to start listening for HTTP request methods at PORT 8080
+        Javalin app = Javalin.create();         // .start(8080); ---- .start() already in Main.java
         // add POST request handler at /register endpoint 
         app.post("/register", this::createAccountHandler); 
 
         // start server at PORT 8080
-        app.start(8080);
+        // app.start(8080); // yields "IllegalStateException" from trying to call start() on Javalin instance when already done
         return app;
     }
 
