@@ -63,7 +63,7 @@ public class SocialMediaController {
             ctx.status(400);
         }else{
             ctx.json(mapper.writeValueAsString(addedAccount));
-            ctx.status(400);
+            ctx.status(200);
         }
     }
 
