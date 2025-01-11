@@ -9,8 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+// import java.util.ArrayList;
+// import java.util.List;
 
 public class AccountDAO {
     // ## 1: Our API should be able to process new User registrations (create).
@@ -50,6 +50,33 @@ public class AccountDAO {
         }
         return null;
     }
+    // ## 1a) Helper function/method to check if username already exists in 'account' table
+    public boolean accountAlreadyExist(String username){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            // write/create SQL query String
+            String sql = "SELECT * FROM account WHERE username = ?";
+            
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            //write preparedStatement's setString and setInt methods here.
+            preparedStatement.setString(1, username);    // at 1st (?) set to argument 'id'
+            // execute/send SQL queries to DB
+            ResultSet rs = preparedStatement.executeQuery();
+            // check if ResultSet is not empty -- contains records to move cursor to (same as while(rs.next(){ return true; } just more direct))
+            if(rs.next()){  
+                // username already exists in the DB table
+                return true;
+            }
+        // if any Exceptions are caught
+        }catch(SQLException e){
+            // console log out to terminal
+            System.out.println(e.getMessage());
+        }
+        // otw return false indicates username DNE in DB table
+        return false;
+    }
+
     // ## 2: Our API should be able to process User logins.
     public Account loginAccountGetAccId(Account acc){
         // connect account table in database
@@ -78,7 +105,7 @@ public class AccountDAO {
                     // rs.getInt("account_id")
                     // .getString("username")
                     // .getString("password"));
-                // return wanted account credentials
+                // return wanted account obj credentials
                 return accFound;
             }
         // if any Exceptions are caught
@@ -89,6 +116,7 @@ public class AccountDAO {
         // otherwise return null status code 404 NOT FOUND -- if data not in DB
         return null;
     }
+
     /* ------------- Below block of code is for POST login but if we want to retrieve ------------- */
     // public Account loginAccount(Account acc){
     //     // create a connection linking to database (where 'account' table is at)
