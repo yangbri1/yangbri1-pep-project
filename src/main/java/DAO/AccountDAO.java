@@ -2,7 +2,7 @@ package DAO;
 
 import Util.ConnectionUtil;
 import Model.Account;
-import Model.Message;
+// import Model.Message;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -60,12 +60,40 @@ public class AccountDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
             //write preparedStatement's setString and setInt methods here.
-            preparedStatement.setString(1, username);    // at 1st (?) set to argument 'id'
+            preparedStatement.setString(1, username);    // at 1st (?) set to arg's 'username'
             // execute/send SQL queries to DB
             ResultSet rs = preparedStatement.executeQuery();
             // check if ResultSet is not empty -- contains records to move cursor to (same as while(rs.next(){ return true; } just more direct))
             if(rs.next()){  
                 // username already exists in the DB table
+                return true;
+            }
+        // if any Exceptions are caught
+        }catch(SQLException e){
+            // console log out to terminal
+            System.out.println(e.getMessage());
+        }
+        // otw return false indicates username DNE in DB table
+        return false;
+    }
+
+    // ## 3) Helper function/method to check if user's id ('posted_by / 'account_id') already exists in 'account' table
+    /* Could use method overloading (same method name as 'accountAlreadyExist()' above w/ dif. # of args or arg data types but want to easier differentiate */
+    public boolean accCheckUserId(int userId){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            // write/create SQL query String
+            String sql = "SELECT * FROM account WHERE account_id = ?";
+            
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            // write preparedStatement's setString and setInt methods here.
+            preparedStatement.setInt(1, userId);    // at 1st (?) set to arg's 'userId'
+            // execute/send SQL queries to DB
+            ResultSet rs = preparedStatement.executeQuery();
+            // check if ResultSet is not empty -- contains records to move cursor to (same as while(rs.next(){ return true; } just more direct))
+            if(rs.next()){  
+                // 'account_id' already exists in the DB table
                 return true;
             }
         // if any Exceptions are caught

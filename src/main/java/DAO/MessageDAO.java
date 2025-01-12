@@ -4,11 +4,19 @@ import Util.ConnectionUtil;
 import Model.Message;
 
 import java.sql.Connection;
+
+// import 'PreparedStatement' & 'Statement' for executing SQL queries/statements
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+
+// import 'ResultSet' for navigating in a DB table
 import java.sql.ResultSet;
+
+// import 'SQLException' to classify any potential SQL exceptions that arose
 import java.sql.SQLException;
-import java.util.ArrayList;
+
+// import 'ArrayList' & 'List' classes in order to store collection of data
+import java.util.ArrayList; // dynamic appending of elements to ArrayList
 import java.util.List;
 
 import org.h2.command.dml.MergeUsing.When;
@@ -90,7 +98,7 @@ public class MessageDAO {
         return messages;
     }
     // ## 5: Our API should be able to retrieve a message by its ID.
-    public String getMessageById(int id){
+    public String getMessageById(int msgId){
         Connection connection = ConnectionUtil.getConnection();
         try {
             // write/create SQL query String
@@ -99,7 +107,7 @@ public class MessageDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
             //write preparedStatement's setString and setInt methods here.
-            preparedStatement.setInt(1, id);    // at 1st (?) set to argument 'id'
+            preparedStatement.setInt(1, msgId);    // at 1st (?) set to argument 'id'
             // execute/send SQL queries to DB
             ResultSet rs = preparedStatement.executeQuery();
             // while ResultSet is not empty (more records) to point to next record/row
