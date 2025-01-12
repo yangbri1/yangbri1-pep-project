@@ -59,7 +59,9 @@ public class MessageService {
         int userId = msg.getPosted_by();
 
         // if 'message_text' field is empty ...
-        if(message != ""){
+        /* double check if message String was empty using both built-in 
+        1) String.isEmpty() & 2) equality operator (==) (probably should've used .equals()) */
+        if(message.isEmpty() || message == ""){  
             // return falsy value
             return null;
         }
@@ -87,29 +89,76 @@ public class MessageService {
 
     // ## 5: Our API should be able to retrieve a message by its ID.
     // fetch specific message by 'message_id'
-    public String getMessageById(int msgId){
-        // call .getMessageById() to retrieve message connected to arg 'id'
-        return messageDAO.getMessageById(msgId);
+    /* Aside:'messageDAO.getMessageByMsgId()' method in 'deleteMessagebyMsgId()' & 'updateMessagebyMsgId()' too */
+    public Message getMessageByMsgId(int msgId){
+        // call .getMessageByMsgId() to retrieve message connected to arg 'id'
+        return messageDAO.getMessageByMsgId(msgId);
     }
 
     /* Wonder if both deleteMessagebyId() & updateMessageById() methods 
     could be OMITTED as they are of VOID return type ... */
     
+    /* The deletion of an existing message should remove an existing message from the database. 
+    1) If the message existed, the response body should contain the now-deleted message.
+    2) If the message did not exist, the response status should be 200 (done in 'SocialMediaController.java'), 
+    but the response body should be empty */
     // ## 6: Our API should be able to delete a message identified by a message ID.
-    public void deleteMessagebyId(int msgId){
-        /* OMITTED! deleteMessagebyId() returns void (no return statement) */
-        // return messageDAO.deleteMessagebyId(msgId);
+    public Message deleteMessagebyMsgId(int msgId){
+         // create a Message variable 'selectedMsg' assigned w/ values -- retrieve from existing msg by its ID
+         Message selectedMsg = messageDAO.getMessageByMsgId(msgId);
+
+         // if 'msgId' DOES NOT EXIST as a 'message_id' in 'message' DB table 
+        if(!messageDAO.msgCheckMsgId(msgId)){
+            return null;
+        }
+        // if there are no such msg ...
+        // if(selectedMsg == null){
+        //     return null;
+        // }
+        // otw if there is a record/row of msg in 'message' table w/ this specific 'account_id'
+        else{
+            // invoke .deleteMessageByMsgId() to perform DELETE on record
+            messageDAO.deleteMessagebyMsgId(msgId);
+        }
+        // after DELETE calling .getMessageByMsgId() show the record AFTER DELETE operation
+        // return(messageDAO.getMessageByMsgId(msgId));
+
+        /*  to show the 'msg' record b4 DELETE return 'selectedMsg' var 
+        -- which was initialized w/ previous row fields BEFORE DELETE operation */
+        return selectedMsg;
     }
 
     // messageDAO.deleteMessagebyId(msg);
-    
+    /* The update of a message should be successful if and only if the 
+    1) message id already exists and the 
+    2) new message_text is not blank and 
+    3) is not over 255 characters. */
     // ## 7: Our API should be able to update a message text identified by a message ID.
-    public void updateMessageById(int msgId, Message msg){
-        /* OMITTED! updateMessageById() returns void (no return statement) */
-        // return messageDAO.updateMessageById(msgId, msg);
-    }
+    public Message updateMessagebyMsgId(int msgId, Message msg){
+        // create a Message variable 'selectedMsg' assigned w/ values -- retrieve from existing msg by its ID
+        Message selectedMsg = messageDAO.getMessageByMsgId(msgId);
+        // assign 'message_text' of 'msg' record to 'currentMsg'
+        String currentMsg = msg.getMessage_text();
 
-    // messageDAO.updateMessageById(msgId, msg);
+        // if 'msgId' DOES NOT EXIST as a 'message_id' in 'message' DB table 
+        if(!messageDAO.msgCheckMsgId(msgId)){
+            return null;
+        }
+        // else if record EXIST but ... there are no such msg (no 'message_text' tied to given 'message_id')...
+        else if(currentMsg.isEmpty()){  // Note: use .isEmpty() over --> else if(selectedMsg == null){
+            return null;
+        }
+        // else if record EXIST but ... 'message_text' exceeds char limit ... 
+        else if(currentMsg.length() > 255){
+            return null;
+        }
+
+        // utilize messageDAO.updateMessageByMsgId() method to UPDATE row/record for selected 'msgId'
+        messageDAO.updateMessageByMsgId(msgId, selectedMsg);
+
+        // calling .getMessageByMsgId() to get UPDATE-d record
+        return(messageDAO.getMessageByMsgId(msgId));
+    }
 
     // ## 8: Our API should be able to retrieve all messages written by a particular user.
     public List<Message> getAllMessagesByUserId(int userId){

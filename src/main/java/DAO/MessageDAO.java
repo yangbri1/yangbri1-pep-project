@@ -98,7 +98,7 @@ public class MessageDAO {
         return messages;
     }
     // ## 5: Our API should be able to retrieve a message by its ID.
-    public String getMessageById(int msgId){
+    public Message getMessageByMsgId(int msgId){
         Connection connection = ConnectionUtil.getConnection();
         try {
             // write/create SQL query String
@@ -119,8 +119,8 @@ public class MessageDAO {
                     rs.getString("message_text"),
                     rs.getLong("time_posted_epoch"));
                 // return 'msg' corresponding to given arg 'id ('message_id') 
-                // return msg;  -- to use this change this method to type 'Message'
-                return msg.message_text;    // returns actual content of message in String format
+                return msg;  // -- use this change this method to type 'Message'
+                // return msg.message_text;    // returns actual content of message in String format
             }
         // if any Exceptions are caught
         }catch(SQLException e){
@@ -132,7 +132,7 @@ public class MessageDAO {
     }
     // ## 6: Our API should be able to delete a message identified by a message ID.
     // similar to UPDATE functionality below but parameter only require msgId
-    public void deleteMessagebyId(int msgId){
+    public void deleteMessagebyMsgId(int msgId){
         // establish a connection to database
         Connection connection = ConnectionUtil.getConnection();
         try {
@@ -158,11 +158,11 @@ public class MessageDAO {
         }
     }
     // ## 7: Our API should be able to update a message text identified by a message ID.
-    /*
+    /* NOTICE: UPDATE method in DAO is of 'void' return type (but in Service is 'Message' obj return type)
      * @param msgId a message ID.
      * @param msg is a message object & the message object does not contain a message ID.
      */
-    public void updateMessageById(int msgId, Message msg){
+    public void updateMessageByMsgId(int msgId, Message msg){
         Connection connection = ConnectionUtil.getConnection();
         try {
             // Write SQL logic here
@@ -186,6 +186,34 @@ public class MessageDAO {
             System.out.println(e.getMessage());
         }
     }
+    // ## 7a) Helper function/method to check if 'message_id' already exists in 'message' table
+    public boolean msgCheckMsgId(int msgId){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            // write/create SQL query String
+            String sql = "SELECT * FROM message WHERE message_id = ?";
+            
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            // write preparedStatement's setString and setInt methods here.
+            preparedStatement.setInt(1, msgId);    // at 1st (?) set to arg's 'msgId'
+            // execute/send SQL queries to DB
+            ResultSet rs = preparedStatement.executeQuery();
+            // check if ResultSet is not empty -- contains records to move cursor to (same as while(rs.next(){ return true; } just more direct))
+            if(rs.next()){  
+                // 'message_id' already exists in the DB table
+                return true;
+            }
+        // if any Exceptions are caught
+        }catch(SQLException e){
+            // console log out to terminal
+            System.out.println(e.getMessage());
+        }
+        // otw return false indicates username DNE in DB table
+        return false;
+    }
+
+    /* Aside: From provided path URL endpoint --- maybe move this method to 'AccountDAO' class */
     // ## 8: Our API should be able to retrieve all messages written by a particular user.
     /* Note: This method should probably be of List type as will be returning a list of all messages by an User */
     public List<Message> getAllMessagesByUserId(int userId){    // 'userId' is just a placeholder (for some 'account_id')
