@@ -50,7 +50,7 @@ public class AccountDAO {
         }
         return null;
     }
-    // ## 1a) Helper function/method to check if username already exists in 'account' table
+    // ## 1a) Helper function/method to check if 'username' already exists in 'account' table
     public boolean accountAlreadyExist(String username){
         Connection connection = ConnectionUtil.getConnection();
         try {
@@ -65,6 +65,32 @@ public class AccountDAO {
             ResultSet rs = preparedStatement.executeQuery();
             // check if ResultSet is not empty -- contains records to move cursor to (same as while(rs.next(){ return true; } just more direct))
             if(rs.next()){  
+                // 'username' already exists in the DB table
+                return true;
+            }
+        // if any Exceptions are caught
+        }catch(SQLException e){
+            // console log out to terminal
+            System.out.println(e.getMessage());
+        }
+        // otw return false indicates 'username' DNE in DB table
+        return false;
+    }
+    // ## 2a) Helper function/method to check if 'password' already exists in 'account' table
+    public boolean accCheckPassword(String password){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            // write/create SQL query String
+            String sql = "SELECT * FROM account WHERE password = ?";
+            
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            //write preparedStatement's setString and setInt methods here.
+            preparedStatement.setString(1, password);    // at 1st (?) set to arg's 'password'
+            // execute/send SQL queries to DB
+            ResultSet rs = preparedStatement.executeQuery();
+            // check if ResultSet is not empty -- contains records to move cursor to (same as while(rs.next(){ return true; } just more direct))
+            if(rs.next()){  
                 // username already exists in the DB table
                 return true;
             }
@@ -73,9 +99,10 @@ public class AccountDAO {
             // console log out to terminal
             System.out.println(e.getMessage());
         }
-        // otw return false indicates username DNE in DB table
+        // otw return false indicates 'password' DNE in DB table
         return false;
     }
+    // ## 2: Our API should be able to process User logins.
 
     // ## 3) Helper function/method to check if user's id ('posted_by / 'account_id') already exists in 'account' table
     /* Could use method overloading (same method name as 'accountAlreadyExist()' above w/ dif. # of args or arg data types but want to easier differentiate */
@@ -111,13 +138,15 @@ public class AccountDAO {
         Connection connection = ConnectionUtil.getConnection();
         // try-catch block for error-handling
         try {
+            // start of SQL logic
             // write/create SQL query String using wildcard (*) to include all columns & filtering w/ 'username', 'password' conditions
-            String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
-            
+            // String sql = "SELECT * FROM account WHERE username = ? AND password = ?";
+            // create SQL statement -- from 'AccountDAO.java' 
+            String sql = "INSERT INTO account (username, password) VALUES (?, ?)" ;
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
-            //write preparedStatement's setString and setInt methods here
             // call .getUsername() & .getPassword() getter methods from 'Account.java' class to retrieve spective data
+            // set parameterized queries w/ respective resource data
             preparedStatement.setString(1, acc.getUsername()); 
             preparedStatement.setString(2, acc.getPassword());      
             // execute/send SQL queries to DB

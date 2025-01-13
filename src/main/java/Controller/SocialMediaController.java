@@ -46,10 +46,10 @@ public class SocialMediaController {
         Javalin app = Javalin.create();         // .start(8080); ---- .start() already in Main.java
         // add POST request handler at /register endpoint 
         app.post("/register", this::createAccountHandler); 
-        // app.post("/login", this::);
+        app.post("/login", this::loginAccountGetAccIdHandler);  // readme.md said to use 'post'
         app.post("/messages", this::createMessageHandler);
 
-        app.get("/messages", this::getAllMessagesHandler);  // readme.md said to use 'post'
+        app.get("/messages", this::getAllMessagesHandler); 
         app.get("/messages/{message_id}", this::getMessageByMsgIdHandler);
         app.delete("/messages/{message_id}", this::deleteMessageByMsgIdHandler);
         app.patch("/messages/{message_id}", this::updateMessageByMsgIdHandler);
@@ -83,6 +83,23 @@ public class SocialMediaController {
     }
 
     // ## 2: Our API should be able to process User logins.
+    // app.post("/login", this::loginAccountGetAccIdHandler);
+    private void loginAccountGetAccIdHandler(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(ctx.body(), Account.class);
+        Account loginAccount = accountService.loginAccountGetAccId(account);
+        // if login fails
+        if(loginAccount == null){
+            // set response status code to 401 (Unauthorized status)
+            ctx.status(401);    
+        }
+        // else if login succeeds
+        else{
+            // set response body w/ 'Account' & set response status to 200 (Success)
+            ctx.json(mapper.writeValueAsString(loginAccount));
+            ctx.status(200);
+        }
+    }
     /**
      * This is an example handler for an example endpoint.
      * @param context The Javalin Context object manages information about both the HTTP request and response.
@@ -111,7 +128,7 @@ public class SocialMediaController {
     }
     // ## 5: Our API should be able to retrieve a message by its ID.
     // app.get("/messages/{message_id}", this::getMessageByMsgIdHandler);
-    private void getMessageByMsgIdHandler(Context ctx){
+    private void getMessageByMsgIdHandler(Context ctx) throws JsonProcessingException {
         // ObjectMapper mapper = new ObjectMapper();
         // Message message = mapper.readValue(ctx.body(), Message.class);
         // parse out "message_id" (String) from path URL parameter & convert into 'int' data type

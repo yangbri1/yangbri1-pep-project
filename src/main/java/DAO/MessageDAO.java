@@ -168,20 +168,29 @@ public class MessageDAO {
             // Write SQL logic here
             // probably should UPDATE by 'message_id'
             // String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id = ?";
-            String sql = "UPDATE message SET message_text = ? WHERE message_id = ?";
+            String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ?, message_id = ? WHERE message_id = ?";
+            // best practice to use 'PreparedStatement' interface in creation of SQL query as it pre-compiles code b4-hand -- lessen chance of SQL Injection working
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
             // write PreparedStatement setString and setInt methods here.
-            // preparedStatement.setInt(1, msg.getPosted_by());
-            // preparedStatement.setString(2, msg.getMessage_text());
-            // preparedStatement.setLong(3, msg.getTime_posted_epoch());
-        
+            preparedStatement.setInt(1, msg.getPosted_by());
+            preparedStatement.setString(2, msg.getMessage_text());
+            preparedStatement.setLong(3, msg.getTime_posted_epoch());
             // preparedStatement.setInt(4, msgId);
 
-            preparedStatement.setString(1, msg.getMessage_text());
-            preparedStatement.setInt(2, msgId);
+            preparedStatement.setInt(4, msgId);
+
+            /* Nevermind from the test results --- actually want to display all 4 columns */
+            // preparedStatement.setString(1, msg.getMessage_text());
+            // preparedStatement.setInt(2, msgId);
 
             preparedStatement.executeUpdate();
+
+            /* testing out creating SQL query using 'Statement' interface */
+            // Statement stmt = connection.createStatement();
+            // String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id = ?";
+            // ResultSet rs = stmt.executeQuery(sql);
+            // stmt.executeQuery(sql);
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }

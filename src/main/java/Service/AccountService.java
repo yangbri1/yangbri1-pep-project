@@ -5,7 +5,6 @@ import DAO.AccountDAO;
 
 // import java.util.List;
 
-//
 public class AccountService {
     // declare an instance variable 'accountDAO'
     AccountDAO accountDAO;
@@ -34,7 +33,7 @@ public class AccountService {
         // & assign arg's 'accountDAO' value to it
         this.accountDAO = accountDAO;
     }
-
+    // ## 1: Our API should be able to process new User registrations.
     // method signature identical to '.createAccount()' method in 'AccountDAO.java' class
     public Account addAccount(Account account){
         // initialize variables to w/ respective values from their calling .getUsername() & .getPassword() methods
@@ -62,6 +61,51 @@ public class AccountService {
         // return .createAccount() as it is since return Account type from that yields the newly INSERT-ed row 
         return accountDAO.createAccount(account);
     }
+    // ## 2: Our API should be able to process User logins.
+    /* The login will be successful if and only if the username and password 
+    provided in the request body JSON match a real account existing on the database. */
+    // method signature identical to namesake in 'AccountDAO.java' class
+    public Account loginAccountGetAccId(Account account){
+        // assign retrieved username, password, account_id from arg obj 'account' to String variables
+        String username = account.getUsername();
+        String password = account.getPassword();
+        // int accountId = account.getAccount_id();
+        /* pass in above initialized 'username' & 'password' variables as parameters to ...
+        'AccountDAO' class' accountAlreadyExist() & accCheckPassword() to check if 'username' & 'password' values are in 'Account' table */
+        boolean usernameInDB = accountDAO.accountAlreadyExist(username);    // 'username' boolean
+        boolean passInDB = accountDAO.accCheckPassword(password);           // 'password' boolean
 
-    // public Account getAccount
+        /* PRELIMINARY CHECK:  Since in order to create/register an account, the username & password were subjected to some constraints ...
+         * ... under the ASSUMPTION that all records INSERT INTO 'Account' DB table so far has been following these guidelines ...
+         * ... it only fits to ASSUME if any of the arg obj 'account' being tested also should fit in as well.
+         * ------------------------------------------------------------------------------------------------- */ 
+        // if provided 'password' < 4 in length ...
+        if(password.length() < 4){
+            // return falsy value
+            return null;
+        }
+        // else if nothing was detected in the 'username' field ...
+        else if(username.isEmpty()){
+            // account creation has failed
+            return null;
+        }
+        // else if username already taken
+        else if(accountDAO.accountAlreadyExist(username)){   // OMITTED: Since we are looking for matches now
+            // indicate so
+            return null;
+        }
+        /* ------------------------------------ END OF PRE-CHECK -------------------------------------------- */
+        // else if 'username' DNE in 'Account' DB table
+        if(usernameInDB == false){
+            return null;
+        }
+        // or f 'password' DNE in 'Account' DB table
+        else if(passInDB == false){
+            return null;
+        }
+        
+        // otw if given username & password matches their fields' credentials in existing 'Account' DB table
+        // incite .loginAccountGetAccId() method
+        return accountDAO.loginAccountGetAccId(account);
+    }
 }
