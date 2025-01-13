@@ -1,6 +1,10 @@
 package Service;
 // import related 'Account' classes in for use
 import Model.Account;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import DAO.AccountDAO;
 
 // import java.util.List;
@@ -33,6 +37,12 @@ public class AccountService {
         // & assign arg's 'accountDAO' value to it
         this.accountDAO = accountDAO;
     }
+
+    public List<Account> getAllAccounts(){
+        //  List<Account> accounts = new ArrayList<>();
+        return accountDAO.getAllAccounts();
+    }
+
     // ## 1: Our API should be able to process new User registrations.
     // method signature identical to '.createAccount()' method in 'AccountDAO.java' class
     public Account addAccount(Account account){

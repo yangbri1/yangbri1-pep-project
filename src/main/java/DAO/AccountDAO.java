@@ -3,6 +3,7 @@ package DAO;
 import Util.ConnectionUtil;
 import Model.Account;
 // import Model.Message;
+import Model.Message;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,8 +12,36 @@ import java.sql.SQLException;
 import java.sql.Statement;
 // import java.util.ArrayList;
 // import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AccountDAO {
+    // to retrieve List of registered accounts --- no req. but for testing on Thunder-Client/POSTMAN
+    public List<Account> getAllAccounts(){
+        Connection connection = ConnectionUtil.getConnection();
+        List<Account> accounts = new ArrayList<>();
+        try {
+            // write/create SQL String 
+            String sql = "SELECT * FROM account";
+            // Note: Use Wildcard * to shorthand select all columns in 'account' table to show
+            // utilizing 'PreparedStatement' interface over 'Statement' interface in executing SQL statement b/c PS pre-compiles SQL & lower likelihood of SQL Injection from User input
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                Account acc = new Account(
+                    rs.getInt("account_id"),
+                    rs.getString("username"),
+                    rs.getString("password"));
+                    
+                accounts.add(acc);
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        // return List of 'accounts' w/ Obj type of String (Recall: Lists only take Complex Obj Types -- NOT primitives)
+        return accounts;
+    }
+
     // ## 1: Our API should be able to process new User registrations (create).
     public Account createAccount(Account acc){
         // create a connection linking to database (where 'account' table is at)

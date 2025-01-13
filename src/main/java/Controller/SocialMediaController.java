@@ -44,11 +44,14 @@ public class SocialMediaController {
         // always start w/ .create() method to configure Javalin
         // .start() to start listening for HTTP request methods at PORT 8080
         Javalin app = Javalin.create();         // .start(8080); ---- .start() already in Main.java
-        // add POST request handler at /register endpoint 
+        // add POST request handler at /register endpoint -- 2nd param: using method reference (shorter than lambda (which is already shorthanded to orig way))
         app.post("/register", this::createAccountHandler); 
         app.post("/login", this::loginAccountGetAccIdHandler);  // readme.md said to use 'post'
-        app.post("/messages", this::createMessageHandler);
+        
+        // quality of life -- for Thunder-Client testing
+        app.get("/accounts", this::getAllAccountsHandler);
 
+        app.post("/messages", this::createMessageHandler);
         app.get("/messages", this::getAllMessagesHandler); 
         app.get("/messages/{message_id}", this::getMessageByMsgIdHandler);
         app.delete("/messages/{message_id}", this::deleteMessageByMsgIdHandler);
@@ -58,6 +61,12 @@ public class SocialMediaController {
         // start server at PORT 8080
         // app.start(8080); // yields "IllegalStateException" from trying to call start() on Javalin instance when already done
         return app;
+    }
+
+    // handler to retrieve all accounts
+    // app.get(path:"/accounts", this::getAllAccountsHandler);
+    private void getAllAccountsHandler(Context ctx){
+        ctx.json(accountService.getAllAccounts());
     }
 
     /**
@@ -76,6 +85,7 @@ public class SocialMediaController {
         Account addedAccount = accountService.addAccount(account);
         if(addedAccount == null){
             ctx.status(400);
+            // ctx.json("Create Account Failed");
         }else{
             ctx.json(mapper.writeValueAsString(addedAccount));
             ctx.status(200);
