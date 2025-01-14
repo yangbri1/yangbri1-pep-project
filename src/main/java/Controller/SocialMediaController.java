@@ -184,15 +184,25 @@ public class SocialMediaController {
     // ## 7: Our API should be able to update a message text identified by a message ID.
     // app.patch("/messages/{message_id}", this::updateMessageByMsgIdHandler);
     private void updateMessageByMsgIdHandler(Context ctx) throws JsonProcessingException {
+        // create an instance of ObjectMapper class to use Jackson library (converts JSON to readable objs --- Java is OOP -- can use objs)
         ObjectMapper mapper = new ObjectMapper();
+        // takes HTTP request body (JSON format) & map data in req.body to 'Message.class' (class is blueprint for objs[can use methods & variables])
         Message message = mapper.readValue(ctx.body(), Message.class);
+        // parse out int from path URL endpoints
         int msg_id = Integer.parseInt(ctx.pathParam("message_id"));
         Message updatedMsg = messageService.updateMessagebyMsgId(msg_id, message);
+        // console log out 'updatedMsg' --- error checking
         System.out.println(updatedMsg); // -------
+        // if update fails
         if(updatedMsg == null){
+            // output default bad request status code
             ctx.status(400);
-        }else{
+        }
+        // if update succeeds 
+        else{
+            // console log out ostream JSON string of 'Message' obj values (including 'message_id')
             ctx.json(mapper.writeValueAsString(updatedMsg));
+            // and default success status code
             ctx.status(200);
         }
     }
