@@ -1,6 +1,7 @@
 package Service;
 // import related 'Account' classes in for use
 import Model.Account;
+import Model.Message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,13 +52,13 @@ public class AccountService {
         String password = account.getPassword();
 
         /* sometimes there will be some form validation on the front-end --- this is on the backend ... */ 
-        // if provided 'password' < 4 in length ...
-        if(password.length() < 4){
+        // if password DNE OR provided 'password' < 4 in length ...
+        if(password == null || password.length() < 4){
             // return falsy value
             return null;
         }
         // else if nothing was detected in the 'username' field ...
-        else if(username.isEmpty()){
+        else if(username == null || username.isEmpty()){
             // account creation has failed
             return null;
         }
@@ -75,47 +76,75 @@ public class AccountService {
     /* The login will be successful if and only if the username and password 
     provided in the request body JSON match a real account existing on the database. */
     // method signature identical to namesake in 'AccountDAO.java' class
-    public Account loginAccountGetAccId(Account account){
+    public Account loginAccountGetAccId(Account account){ 
         // assign retrieved username, password, account_id from arg obj 'account' to String variables
         String username = account.getUsername();
         String password = account.getPassword();
         // int accountId = account.getAccount_id();
+
+        // retrieve connected account associated to above 'username'
+        Account accByUsername = accountDAO.getAccountByUsername(username);
+
         /* pass in above initialized 'username' & 'password' variables as parameters to ...
         'AccountDAO' class' accountAlreadyExist() & accCheckPassword() to check if 'username' & 'password' values are in 'Account' table */
-        boolean usernameInDB = accountDAO.accountAlreadyExist(username);    // 'username' boolean
-        boolean passInDB = accountDAO.accCheckPassword(password);           // 'password' boolean
+        // boolean usernameInDB = accountDAO.accountAlreadyExist(username);    // 'username' boolean
+        // boolean passInDB = accountDAO.accCheckPassword(password);           // 'password' boolean
 
         /* PRELIMINARY CHECK:  Since in order to create/register an account, the username & password were subjected to some constraints ...
          * ... under the ASSUMPTION that all records INSERT INTO 'Account' DB table so far has been following these guidelines ...
          * ... it only fits to ASSUME if any of the arg obj 'account' being tested also should fit in as well.
          * ------------------------------------------------------------------------------------------------- */ 
-        // if provided 'password' < 4 in length ...
-        if(password.length() < 4){
+        // if there's no password OR provided 'password' < 4 in length ...
+        if(password == null || password.length() < 4){
             // return falsy value
             return null;
         }
-        // else if nothing was detected in the 'username' field ...
-        else if(username.isEmpty()){
+        // if nothing was detected in the 'username' field ...
+        if(username.isEmpty() || username == null){
             // account creation has failed
             return null;
         }
         // else if username already taken
-        else if(accountDAO.accountAlreadyExist(username)){   // OMITTED: Since we are looking for matches now
-            // indicate so
-            return null;
-        }
+        // else if(accountDAO.accountAlreadyExist(username)){   // OMITTED: Since we are looking for matches now
+        //     // indicate so
+        //     return null;
+        // }
         /* ------------------------------------ END OF PRE-CHECK -------------------------------------------- */
-        // else if 'username' DNE in 'Account' DB table
-        if(usernameInDB == false){
-            return null;
+        // if given username was detected in 'account' database table ...
+        if(accByUsername != null){
+            // and the password of in the record are of the same value (using loose comparison -- .equals() [should for complex Obj String types])
+            if(password.equals(accByUsername.getPassword())){
+                // return that 'account' obj of 'account_id', 'username', 'password' values in JSON String (done in 'SocialMediaController.java' -- routing URL paths)
+                return(accByUsername);
+            }
+            // and the password does NOT match ...
+            else{
+                // return falsey value
+                return null;
+            }
+            
         }
-        // or f 'password' DNE in 'Account' DB table
-        else if(passInDB == false){
-            return null;
-        }
+        // return this by default --- fail safe
+        return null;
         
+        // else if 'username' DNE in 'Account' DB table
+        // if(usernameInDB == false){
+        //     return null;
+        // }
+        // // or if 'password' DNE in 'Account' DB table
+        // if(passInDB == false){
+        //     return null;
+        // }
+        // // if(accountDAO.accountAlreadyExist(username))
+        // if(accountDAO.accountAlreadyExist(username)){   // OMITTED: Since we are looking for matches now
+        //     // indicate so
+        //     return null;
+        // }
+
         // otw if given username & password matches their fields' credentials in existing 'Account' DB table
         // incite .loginAccountGetAccId() method
-        return accountDAO.loginAccountGetAccId(account);
+        // return accountDAO.loginAccountGetAccId(account);
     }
+    
+    
 }

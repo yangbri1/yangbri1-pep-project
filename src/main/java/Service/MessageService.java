@@ -13,13 +13,13 @@ import Model.Account;
 import DAO.AccountDAO;
 
 // import 'PreparedStatement' for executing SQL queries/statements
-import java.sql.PreparedStatement;
+// import java.sql.PreparedStatement;
 // import 'ResultSet' for navigating in a DB table
-import java.sql.ResultSet;
+// import java.sql.ResultSet;
 // import 'SQLException' to classify any potential SQL exceptions that arose
-import java.sql.SQLException;
+// import java.sql.SQLException;
 // import 'ArrayList' class to allow dynamic appending of elements to ArrayList
-import java.util.ArrayList;
+// import java.util.ArrayList;
 // import List class from java.util package to store large collections of data 
 // ex. later used in GET functionality when retrieving msgs
 import java.util.List;
@@ -71,7 +71,7 @@ public class MessageService {
             return null;
         }
         // else if message's 'posted_by' is NOT FOUND as an 'account_id' in DB table ...
-        else if(!accountDAO.accCheckUserId(userId)){
+        else if(!accountDAO.accCheckUserId(userId)){ // || message == null){
             // indicate so
             return null;
         }
@@ -108,13 +108,14 @@ public class MessageService {
          Message selectedMsg = messageDAO.getMessageByMsgId(msgId);
 
          // if 'msgId' DOES NOT EXIST as a 'message_id' in 'message' DB table 
-        if(!messageDAO.msgCheckMsgId(msgId)){
-            return null;
-        }
-        // if there are no such msg ...
-        // if(selectedMsg == null){
+        // if(!messageDAO.msgCheckMsgId(msgId)){
         //     return null;
         // }
+        // if there are no such msg ...
+        if(selectedMsg == null){    // Note: this does the same as above if
+            return null;
+        }
+
         // otw if there is a record/row of msg in 'message' table w/ this specific 'account_id'
         else{
             // invoke .deleteMessageByMsgId() to perform DELETE on record
@@ -129,36 +130,55 @@ public class MessageService {
     }
 
     // messageDAO.deleteMessagebyId(msg);
+    /*The request body should 
+    1) contain a new message_text values to replace the message identified by message_id. 
+    The request body can not be guaranteed to contain any other information. */
     /* The update of a message should be successful if and only if the 
-    1) message id already exists and the 
-    2) new message_text is not blank and 
-    3) is not over 255 characters. */
+    2) message id already exists and the 
+    3) new message_text is not blank and 
+    4) is not over 255 characters. */
     // ## 7: Our API should be able to update a message text identified by a message ID.
     public Message updateMessagebyMsgId(int msgId, Message msg){
-        // create a Message variable 'selectedMsg' assigned w/ values -- retrieve from existing msg by its ID
-        Message selectedMsg = messageDAO.getMessageByMsgId(msgId);
-        // assign 'message_text' of 'msg' record to 'currentMsg'
-        String currentMsg = msg.getMessage_text();
+    // retrieve existing message (in 'message' table) by its 'msgId'
+    Message selectedMsg = messageDAO.getMessageByMsgId(msgId);
 
-        // if 'msgId' DOES NOT EXIST as a 'message_id' in 'message' DB table 
-        if(!messageDAO.msgCheckMsgId(msgId)){
-            return null;
-        }
-        // else if record EXIST but ... there are no such msg (no 'message_text' tied to given 'message_id')...
-        else if(currentMsg.isEmpty()){  // Note: use .isEmpty() over --> else if(selectedMsg == null){
-            return null;
-        }
-        // else if record EXIST but ... 'message_text' exceeds char limit ... 
-        else if(currentMsg.length() > 255){
-            return null;
-        }
+    // extract out 'message_text' of arg's 'msg' --- to update selectedMsg's 'message_text' with
+    String newMsg = msg.getMessage_text();
 
-        // utilize messageDAO.updateMessageByMsgId() method to UPDATE row/record for selected 'msgId'
-        messageDAO.updateMessageByMsgId(msgId, selectedMsg);
-
-        // calling .getMessageByMsgId() to get UPDATE-d record
-        return(messageDAO.getMessageByMsgId(msgId));
+    // checking if wanted record even exist in the 'message' table
+    if(selectedMsg == null){
+        // if not return falsey value null
+        return null;
     }
+    
+    // if 'msgId' DOES NOT EXIST as a 'message_id' in 'message' DB table 
+    // if(messageDAO.msgCheckMsgId(msgId) == false){
+    //     return null;
+    // }
+    // else if record EXIST in 'message' table BUT newMsg obj do NOT have a 'message_text' value
+    if(newMsg == null || newMsg.isEmpty()){  // Note: handle null and empty
+        return null;
+    }
+    // else if record EXIST but ... newMsg's 'message_text' exceeds char limit ... 
+    if(newMsg.length() > 255){
+        return null;
+    }
+
+    // if inputted msg's request body has 'message_text' field
+    if(msg.getMessage_text() != null){
+        // update 'message_text' field of the record in the table
+        selectedMsg.setMessage_text(msg.getMessage_text());
+    }
+
+    // UPDATE row/record for selected 'msgId'
+    messageDAO.updateMessageByMsgId(msgId, selectedMsg);
+
+    // calling .getMessageByMsgId() to get UPDATE-d record
+    // return messageDAO.getMessageByMsgId(msgId);  // --- this oddly enough fetched old, unedited message record
+
+    // fetch actual updated record
+    return selectedMsg;
+}
 
     // ## 8: Our API should be able to retrieve all messages written by a particular user.
     public List<Message> getAllMessagesByUserId(int userId){

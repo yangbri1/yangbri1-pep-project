@@ -167,8 +167,8 @@ public class MessageDAO {
         try {
             // Write SQL logic here
             // probably should UPDATE by 'message_id'
-            // String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id = ?";
-            String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ?, message_id = ? WHERE message_id = ?";
+            String sql = "UPDATE message SET posted_by = ?, message_text = ?, time_posted_epoch = ? WHERE message_id = ?";
+            // String sql = "UPDATE message SET message_text = ? WHERE message_id = ?";
             // best practice to use 'PreparedStatement' interface in creation of SQL query as it pre-compiles code b4-hand -- lessen chance of SQL Injection working
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
@@ -176,9 +176,9 @@ public class MessageDAO {
             preparedStatement.setInt(1, msg.getPosted_by());
             preparedStatement.setString(2, msg.getMessage_text());
             preparedStatement.setLong(3, msg.getTime_posted_epoch());
-            // preparedStatement.setInt(4, msgId);
-
             preparedStatement.setInt(4, msgId);
+
+            // preparedStatement.setInt(5, msgId);
 
             /* Nevermind from the test results --- actually want to display all 4 columns */
             // preparedStatement.setString(1, msg.getMessage_text());
@@ -204,8 +204,8 @@ public class MessageDAO {
             
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
-            // write preparedStatement's setString and setInt methods here.
-            preparedStatement.setInt(1, msgId);    // at 1st (?) set to arg's 'msgId'
+            // write preparedStatement's setString and setInt methods here for parameterized query placeholder (?) above
+            preparedStatement.setInt(1, msgId);    // set 1st (?) to arg's 'msgId'
             // execute/send SQL queries to DB
             ResultSet rs = preparedStatement.executeQuery();
             // check if ResultSet is not empty -- contains records to move cursor to (same as while(rs.next(){ return true; } just more direct))
@@ -221,6 +221,39 @@ public class MessageDAO {
         // otw return false indicates username DNE in DB table
         return false;
     }
+    // ## 7b) OMITTED --- could just use ##5 getMessageByMsgId()
+    // public Message getUpdatedMsgRecordById(int msgId){
+    //     Connection connection = ConnectionUtil.getConnection();
+    //     try {
+    //         // write/create SQL query String
+    //         String sql = "SELECT * FROM message WHERE message_id = ?";
+            
+    //         PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+    //         //write preparedStatement's setString and setInt methods here.
+    //         preparedStatement.setInt(1, msgId);    // at 1st (?) set to argument 'id'
+    //         // execute/send SQL queries to DB
+    //         ResultSet rs = preparedStatement.executeQuery();
+    //         // while ResultSet is not empty (more records) to point to next record/row
+    //         while(rs.next()){
+    //             // create an instance of Message obj -- retrieve from Message obj
+    //             Message msg = new Message(
+    //                 rs.getInt("message_id"),
+    //                 rs.getInt("posted_by"),
+    //                 rs.getString("message_text"),
+    //                 rs.getLong("time_posted_epoch"));
+    //             // return 'msg' corresponding to given arg 'id ('message_id') 
+    //             return msg;  // -- use this change this method to type 'Message'
+    //             // return msg.message_text;    // returns actual content of message in String format
+    //         }
+    //     // if any Exceptions are caught
+    //     }catch(SQLException e){
+    //         // console log out to terminal
+    //         System.out.println(e.getMessage());
+    //     }
+    //     // otherwise return null status code 404 NOT FOUND -- if data not in DB
+    //     return null;
+    // }
 
     /* Aside: From provided path URL endpoint --- maybe move this method to 'AccountDAO' class */
     // ## 8: Our API should be able to retrieve all messages written by a particular user.
